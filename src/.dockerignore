@@ -1,0 +1,14 @@
+.git
+.gitignore
+.cache
+
+#gradle artifacts
+**/bin
+bin
+build
+gradle
+
+Dockerfile
+
+docker-compose.yml
+*.md
