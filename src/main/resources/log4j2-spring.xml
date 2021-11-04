@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%d [%t] %-5p %c - %m%n" />
+        </Console>
+</Appenders>
+
+    <Loggers>
+        <!-- LOG everything at INFO level -->
+        <Root level="info">
+            <AppenderRef ref="Console" />
+        </Root>
+
+        <Logger name="com.github.kgrama" level="debug"></Logger>
+    </Loggers>
+
+</Configuration>
