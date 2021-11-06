@@ -36,7 +36,7 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 	private MakeExternalCalls externalCalls;
 
 	@Override
-	public List<JSONObject> findRequestedResource(String identifier, String url,LinkedList<Throwable> exceptionList) {
+	public List<JSONObject> findRequestedResource(String identifier, String url,List<Throwable> exceptionList) {
 		log.debug("Processing for identifier {} from url {}", identifier, url);
 		var requestSemaphore = new Semaphore(1);
 		var responseData = new LinkedList<DataBuffer>();
@@ -103,7 +103,7 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 		
 	}
 
-	private InputStream consolidateResponseData(LinkedList<DataBuffer> responseData, Semaphore requestSemaphore, LinkedList<Throwable> exceptionList) {
+	private InputStream consolidateResponseData(LinkedList<DataBuffer> responseData, Semaphore requestSemaphore, List<Throwable> exceptionList) {
 		try {
 			if (requestSemaphore.tryAcquire(maxWaitTime, TimeUnit.SECONDS)) {
 				var consolidatedData = DataBufferUtils.join(Flux.fromStream(responseData.stream()));
@@ -119,7 +119,7 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 		return null;
 	}
 
-	private void makeExternalCall(List<DataBuffer> responseAccumulator, String identifier, String url, Semaphore semaphore, LinkedList<Throwable> exceptionList) {
+	private void makeExternalCall(List<DataBuffer> responseAccumulator, String identifier, String url, Semaphore semaphore, List<Throwable> exceptionList) {
 		var serverResponses = externalCalls.forwardRequestForComplexDataTypes(url, DataBuffer.class);
 		serverResponses
 		.doOnComplete(() -> {} )

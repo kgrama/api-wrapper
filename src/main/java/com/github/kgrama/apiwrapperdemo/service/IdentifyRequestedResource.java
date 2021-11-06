@@ -1,6 +1,5 @@
 package com.github.kgrama.apiwrapperdemo.service;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -16,5 +15,5 @@ public interface IdentifyRequestedResource {
 	
 	String KEY_FOR_BRANDNAME = "BrandName";
 	
-	List<JSONObject> findRequestedResource(String identifier, String url, LinkedList<Throwable> exceptionList); 
+	List<JSONObject> findRequestedResource(String identifier, String url, List<Throwable> exceptionList); 
 }
