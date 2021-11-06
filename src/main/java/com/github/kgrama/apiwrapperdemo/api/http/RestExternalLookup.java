@@ -3,6 +3,7 @@ package com.github.kgrama.apiwrapperdemo.api.http;
 import java.util.Base64;
 import java.util.LinkedList;
 
+import org.json.JSONWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +47,8 @@ public class RestExternalLookup implements LookupExternalData {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<LookupResponse>(LookupResponse.builder()
-				.identifier(url)
-				.externalObject(matchingResponses.get(0)).build(),
+				.identifier(identifier)
+				.externalObject(JSONWriter.valueToString(matchingResponses.get(0))).build(),
 				HttpStatus.OK); 
 	}
 

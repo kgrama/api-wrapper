@@ -1,7 +1,5 @@
 package com.github.kgrama.apiwrapperdemo.model;
 
-import org.json.JSONObject;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,5 +8,5 @@ import lombok.Data;
 public class LookupResponse {
 	
 	private String identifier;
-	private JSONObject externalObject;
+	private String externalObject;
 }
