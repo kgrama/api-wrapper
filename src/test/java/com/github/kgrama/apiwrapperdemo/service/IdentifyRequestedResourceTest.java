@@ -1,0 +1,94 @@
+package com.github.kgrama.apiwrapperdemo.service;
+
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.kgrama.apiwrapperdemo.service.exceptions.ProcessingError;
+import com.github.kgrama.apiwrapperdemo.support.MultipartDataTestParent;
+
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
+public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
+
+	private String urlString = "";
+	private String  testPath = "/some-path/";
+
+	private String[] validATMIdentifiers = {"LFFFBC11", "LFFADC11"};
+	private String[] invalidATMIdentifiers = {"30935500", "30847300"};
+
+	@BeforeEach
+	public void initUrlString() {
+		urlString = String.format("http://localhost:%s%s", mockBackend.getPort(), testPath);
+	}
+
+	@Autowired
+	private IdentifyRequestedResource identifyExternalResource;
+
+	@Test
+	public void beanExists() {
+		log.debug("Verify test context setup");
+		assertNotNull(identifyExternalResource, "The make external calls service shoud exist");
+	}
+
+	@Test
+	public void verifySlowResponsesResultInError() throws InterruptedException, JsonProcessingException {
+		log.debug("Verify that slow responses are handled");
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(41, TimeUnit.SECONDS));
+		var  exceptionList = new LinkedList<Throwable>();
+		await().atMost(45, TimeUnit.SECONDS).untilAsserted(() -> {
+			assertThrows(ProcessingError.class, () -> 
+				identifyExternalResource.findRequestedResource(validATMIdentifiers[0], urlString,exceptionList));
+		});
+	}
+	
+	@Test
+	public void verifyErrorResponsesResultInError() throws InterruptedException, JsonProcessingException {
+		log.debug("Verify that status !2xx responses are handled");
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS).setResponseCode(400));
+		var  exceptionList = new LinkedList<Throwable>();
+		await().atMost(45, TimeUnit.SECONDS).untilAsserted(() -> {
+			assertThrows(ProcessingError.class, () -> 
+				identifyExternalResource.findRequestedResource(validATMIdentifiers[0], urlString,exceptionList));
+		});
+	}
+	
+	@Test
+	public void verifyCorrectResourceIdentification() throws InterruptedException, JsonProcessingException {
+		log.debug("Verify that status 2xx responses are handled");
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
+		var  exceptionList = new LinkedList<Throwable>();
+		var jsonResponse = identifyExternalResource.findRequestedResource(validATMIdentifiers[0], urlString,exceptionList);
+		assertTrue(exceptionList.isEmpty());
+		assertNotNull(jsonResponse);
+		assertFalse(jsonResponse.isEmpty());
+	}
+	
+	@Test
+	public void verifyCorrectResourceIdentificationButNoResource() throws InterruptedException, JsonProcessingException {
+		log.debug("Verify that status 2xx responses are handled");
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
+		var  exceptionList = new LinkedList<Throwable>();
+		var jsonResponse = identifyExternalResource.findRequestedResource(invalidATMIdentifiers[0], urlString,exceptionList);
+		assertTrue(exceptionList.isEmpty());
+		assertNotNull(jsonResponse);
+		assertTrue(jsonResponse.isEmpty());
+	}
+}
