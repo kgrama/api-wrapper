@@ -48,7 +48,7 @@ public class RestExternalLookup implements LookupExternalData {
 		}
 		return new ResponseEntity<LookupResponse>(LookupResponse.builder()
 				.identifier(identifier)
-				.externalObject(JSONWriter.valueToString(matchingResponses.get(0))).build(),
+				.externalObject(matchingResponses.get(0)).build(),
 				HttpStatus.OK); 
 	}
 

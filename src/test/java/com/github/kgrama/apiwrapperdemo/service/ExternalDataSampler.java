@@ -1,6 +1,7 @@
 package com.github.kgrama.apiwrapperdemo.service;
 
-import org.junit.jupiter.api.Test;
+
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,7 +16,7 @@ public class ExternalDataSampler {
 	@Autowired
 	private MakeExternalCalls makeExternalCalls;
 	
-	@Test
+	@Ignore
 	public void fetchSampleData () throws JsonProcessingException, InterruptedException {
 		log.debug("Fetch authorativesampledata");
 		var testPath = "https://developer.lloydsbank.com/opendata-v2.2#get-atms-2.2";
