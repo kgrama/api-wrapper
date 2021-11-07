@@ -59,4 +59,20 @@ public class APIWrapperExternalAPITest extends MultipartDataTestParent {
 		var lookUpReq = "/"+ LookupExternalData.V1_PATH.concat(encoder.encodeToString(urlString.getBytes())).concat("/").concat(invalidATMIdentifiers[0]);
 		mvc.perform(get(lookUpReq)).andDo(print()).andExpect(status().is4xxClientError());
 	}
+	
+	@Test
+	public void verifyInvalidRequestResponseA() throws Exception {
+		log.debug("Verify that status !2xx responses are handled");
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
+		var lookUpReq = "/"+ LookupExternalData.V1_PATH.concat(encoder.encodeToString(urlString.getBytes()).concat("blah")).concat("/").concat(invalidATMIdentifiers[0]);
+		mvc.perform(get(lookUpReq)).andDo(print()).andExpect(status().is4xxClientError());
+	}
+	
+	@Test
+	public void verifyInvalidRequestResponseB() throws Exception {
+		log.debug("Verify that status !2xx responses are handled");
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
+		var lookUpReq = "/"+ LookupExternalData.V1_PATH.concat(encoder.encodeToString(urlString.getBytes())).concat("/");
+		mvc.perform(get(lookUpReq)).andDo(print()).andExpect(status().is4xxClientError());
+	}
 }
