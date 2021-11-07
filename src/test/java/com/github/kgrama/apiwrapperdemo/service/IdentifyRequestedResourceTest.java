@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
@@ -24,7 +25,7 @@ import com.github.kgrama.apiwrapperdemo.support.MultipartDataTestParent;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 
@@ -33,7 +34,10 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 
 	private String[] validATMIdentifiers = {"LFFFBC11", "LFFADC11"};
 	private String[] invalidATMIdentifiers = {"30935500", "30847300"};
-
+	
+	@Value("${processing.wait.time.max:40}") 
+	private long maxWaitTime;
+	
 	@BeforeEach
 	public void initUrlString() {
 		urlString = String.format("http://localhost:%s%s", mockBackend.getPort(), testPath);
@@ -51,9 +55,9 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 	@Test
 	public void verifySlowResponsesResultInError() throws InterruptedException, JsonProcessingException {
 		log.debug("Verify that slow responses are handled");
-		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(41, TimeUnit.SECONDS));
+		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(maxWaitTime+1, TimeUnit.SECONDS));
 		var  exceptionList = new LinkedList<Throwable>();
-		await().atMost(45, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(maxWaitTime+5, TimeUnit.SECONDS).untilAsserted(() -> {
 			assertThrows(ProcessingError.class, () -> 
 				identifyExternalResource.findRequestedResource(validATMIdentifiers[0], urlString,exceptionList));
 		});
@@ -64,7 +68,7 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 		log.debug("Verify that status !2xx responses are handled");
 		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS).setResponseCode(400));
 		var  exceptionList = new LinkedList<Throwable>();
-		await().atMost(45, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(maxWaitTime+5, TimeUnit.SECONDS).untilAsserted(() -> {
 			assertThrows(ProcessingError.class, () -> 
 				identifyExternalResource.findRequestedResource(validATMIdentifiers[0], urlString,exceptionList));
 		});
@@ -87,7 +91,6 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
 		var  exceptionList = new LinkedList<Throwable>();
 		var jsonResponse = identifyExternalResource.findRequestedResource(invalidATMIdentifiers[0], urlString,exceptionList);
-		assertTrue(exceptionList.isEmpty());
 		assertNotNull(jsonResponse);
 		assertTrue(jsonResponse.isEmpty());
 	}

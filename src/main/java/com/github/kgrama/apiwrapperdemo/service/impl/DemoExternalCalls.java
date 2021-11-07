@@ -16,24 +16,12 @@ import com.github.kgrama.apiwrapperdemo.service.exceptions.ExternalServiceError;
 
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Log4j2
 @Service
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class DemoExternalCalls implements MakeExternalCalls {
 	
-	
-	
-	@Override
-	public Mono<?> forwardRequestForSmallDataset(String baseUrl, Class responseType) {
-		return buildClientAndMakeExternalCall(baseUrl)
-				.onStatus(HttpStatus::isError, response -> {
-					return Mono.error(new ExternalServiceError(response.statusCode()));
-				})
-				.bodyToMono(responseType);
-	}
-
 	private ResponseSpec buildClientAndMakeExternalCall(String baseUrl) {
 		try {
 			var webClientForRequest = WebClient.builder()

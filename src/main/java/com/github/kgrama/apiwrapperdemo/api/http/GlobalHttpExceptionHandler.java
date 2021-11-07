@@ -20,4 +20,11 @@ public class GlobalHttpExceptionHandler {
 		log.info("Illegal argument exception");
 		return new ResponseEntity<ErrorMessage>(new ErrorMessage("Bad request"), HttpStatus.BAD_REQUEST );
 	}
+	
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	@ExceptionHandler(value = {Exception.class})
+	public ResponseEntity<ErrorMessage> somethingwentWrong(Exception err, WebRequest request) {
+		log.error("Unhandled exception {}", err);
+		return new ResponseEntity<ErrorMessage>(new ErrorMessage("ServerFail!"), HttpStatus.BAD_REQUEST );
+	}
 }

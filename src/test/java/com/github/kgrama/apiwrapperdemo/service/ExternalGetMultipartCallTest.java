@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -34,6 +35,9 @@ public class ExternalGetMultipartCallTest extends MultipartDataTestParent {
 	
 	@Autowired
 	private MakeExternalCalls makeExternalCalls;
+	
+	@Value("${processing.wait.time.max:40}") 
+	private long maxWaitTime;
 
 	private String urlString = "";
 	private String  testPath = "/some-path/";
@@ -67,12 +71,12 @@ public class ExternalGetMultipartCallTest extends MultipartDataTestParent {
 					responseAccumulator.add(DataBuffer.class.cast(val));
 					});
 		assertFalse(semaphore.availablePermits() > 0);
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(maxWaitTime + 5 , TimeUnit.SECONDS).untilAsserted(() -> {
 			assertTrue(semaphore.availablePermits() > 0);
 		});
 		
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
-			assertEquals(4,responseAccumulator.size() , "Four chunks expected");
+			assertEquals(5,responseAccumulator.size() , "Five chunks expected");
 		});
 		validateOutboundRequest(testPath);
 	}
@@ -94,11 +98,11 @@ public class ExternalGetMultipartCallTest extends MultipartDataTestParent {
 						fail("No valid data transmitted");
 					});
 		assertFalse(semaphore.availablePermits() > 0);
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(maxWaitTime + 5, TimeUnit.SECONDS).untilAsserted(() -> {
 			assertTrue(semaphore.availablePermits() > 0);
 		});
 		
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(maxWaitTime + 5, TimeUnit.SECONDS).untilAsserted(() -> {
 			assertEquals(0,responseAccumulator.size() , "No chunks expected");
 		});
 		validateOutboundRequest(testPath);

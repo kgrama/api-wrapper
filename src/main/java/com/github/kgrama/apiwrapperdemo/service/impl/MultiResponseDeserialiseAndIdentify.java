@@ -1,6 +1,7 @@
 package com.github.kgrama.apiwrapperdemo.service.impl;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -44,7 +45,11 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 		if (exceptionList.isEmpty()) {
 			var dataAsStream = consolidateResponseData(responseData, requestSemaphore, exceptionList);
 			log.debug("Finished consolidating data, looking for resource");
-			return findJsonObject(dataAsStream, identifier);
+			try {
+				return findJsonObject(dataAsStream, identifier);
+			} catch (Exception e) {
+				return Collections.emptyList();
+			}
 		}
 		if (!exceptionList.isEmpty()) {
 			throw new ProcessingError(exceptionList);
