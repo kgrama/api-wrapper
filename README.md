@@ -6,17 +6,20 @@ To start checkout the project  and run
 
 ```docker-compose up```
 
+
 Alternatively use the docker command to build the image and run it. The container exposes its java service on port 8080 under the root context 
 
 ```host:8080/api-wrapper```
 
+
 Actuators are exposed at 
 
-```host:8080/api-wrapper/actuator/info ```
+```
+host:8080/api-wrapper/actuator/info
+host:8080/api-wrapper/actuator/health
+host:8080/api-wrapper/actuator/metrics
 
-```host:8080/api-wrapper/actuator/health```
-
-```host:8080/api-wrapper/actuator/metrics```
+```
 
 Open API/swagger documentation is available at 
 

@@ -17,7 +17,7 @@ public class JSONObjectCustomSerialise extends JsonSerializer<JSONObject> {
 	@Override
 	public void serialize(JSONObject value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
 		try {
-			gen.writeEmbeddedObject(JSONWriter.valueToString(value));
+			gen.writeRaw(JSONWriter.valueToString(value));
 		} catch (Exception e) {
 			log.error("{}", e);
 			gen.writeStartObject();
