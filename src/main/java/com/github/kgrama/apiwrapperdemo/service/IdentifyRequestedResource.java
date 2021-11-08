@@ -3,7 +3,10 @@ package com.github.kgrama.apiwrapperdemo.service;
 import java.util.List;
 
 import org.json.JSONObject;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 
+@CacheConfig(cacheNames = {"externals"})
 public interface IdentifyRequestedResource {
 	String HARD_CODED_OBJ_LOOKUP_KEY = "Identification";
 	
@@ -15,5 +18,6 @@ public interface IdentifyRequestedResource {
 	
 	String KEY_FOR_BRANDNAME = "BrandName";
 	
+	@Cacheable( unless = "#result == null || #result.error || #result.isEmpty()")
 	List<JSONObject> findRequestedResource(String identifier, String url, List<Throwable> exceptionList); 
 }

@@ -1,0 +1,4 @@
+hazelcast:
+  cache: 
+    externals:
+      management-enabled: true
