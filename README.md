@@ -2,25 +2,40 @@
 
 This application is a java spring boot application that exposes one API to retrieve and filter data from an external URL.
 
-To start checkout the project  and run 
+To start checkout the project  and run
 
 ```docker-compose up```
 
 
-Alternatively use the docker command to build the image and run it. The container exposes its java service on port 8080 under the root context 
-
-```host:8080/api-wrapper```
-
-
-Actuators are exposed at 
+Alternatively use the docker command to build the image and run it. The container exposes its java service under the root context
 
 ```
-host:8080/api-wrapper/actuator/info
-host:8080/api-wrapper/actuator/health
-host:8080/api-wrapper/actuator/metrics
+/api-wrapper
+```
+
+Actuators are exposed at
+
+```
+/api-wrapper/actuator/info
+/api-wrapper/actuator/health
+/api-wrapper/actuator/metrics
 
 ```
 
-Open API/swagger documentation is available at 
+Open API/swagger documentation is available at
 
-```http://localhost:8080/api-wrapper/swagger-ui.html```
+```
+/api-wrapper/swagger-ui.html
+```
+
+### Querying openbanking ATM respources
+
+Once the service is running via docker it currently supports the filtering of openbanking ATM resources via the following API,
+```
+/api-wrapper/v1/{url safe base64 encoded lookup url}/{ATM identifier}
+```
+
+ for example to query for the full details of ATM *LFFFBC11* from [Lloyds bank open banking API](https://api.lloydsbank.com/open-banking/v2.2/atms) use the following url:
+```
+/api-wrapper/v1/aHR0cHM6Ly9hcGkubGxveWRzYmFuay5jb20vb3Blbi1iYW5raW5nL3YyLjIvYXRtcw==/LFFFBC11
+```
