@@ -1,6 +1,7 @@
 package com.github.kgrama.apiwrapperdemo.service;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,6 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.kgrama.apiwrapperdemo.reporting.ApplicationErrorTracker;
 import com.github.kgrama.apiwrapperdemo.service.exceptions.ProcessingError;
 import com.github.kgrama.apiwrapperdemo.support.MultipartDataTestParent;
 
@@ -37,6 +39,9 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 	
 	@Value("${processing.wait.time.max:40}") 
 	private long maxWaitTime;
+	
+	@Autowired 
+	private ApplicationErrorTracker reporting;
 	
 	@BeforeEach
 	public void initUrlString() {
@@ -89,9 +94,12 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 	public void verifyCorrectResourceIdentificationButNoResource() throws InterruptedException, JsonProcessingException {
 		log.debug("Verify that status 2xx responses are handled");
 		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
+		var previous = reporting.getParseExceptionCounter().count();
 		var  exceptionList = new LinkedList<Throwable>();
 		var jsonResponse = identifyExternalResource.findRequestedResource(invalidATMIdentifiers[0], urlString,exceptionList);
 		assertNotNull(jsonResponse);
 		assertTrue(jsonResponse.isEmpty());
+		var after = reporting.getParseExceptionCounter().count();
+		assertEquals(previous, after);
 	}
 }

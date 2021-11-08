@@ -19,6 +19,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.github.kgrama.apiwrapperdemo.reporting.ApplicationErrorTracker;
 import com.github.kgrama.apiwrapperdemo.service.IdentifyRequestedResource;
 import com.github.kgrama.apiwrapperdemo.service.MakeExternalCalls;
 import com.github.kgrama.apiwrapperdemo.service.exceptions.ExternalServiceError;
@@ -35,7 +36,10 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 
 	@Autowired
 	private MakeExternalCalls externalCalls;
-
+	
+	@Autowired 
+	private ApplicationErrorTracker reporting;
+	
 	@Override
 	public List<JSONObject> findRequestedResource(String identifier, String url,List<Throwable> exceptionList) {
 		log.debug("Processing for identifier {} from url {}", identifier, url);
@@ -48,6 +52,7 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 			try {
 				return findJsonObject(dataAsStream, identifier);
 			} catch (Exception e) {
+				reporting.getParseExceptionCounter().increment();
 				return Collections.emptyList();
 			}
 		}
