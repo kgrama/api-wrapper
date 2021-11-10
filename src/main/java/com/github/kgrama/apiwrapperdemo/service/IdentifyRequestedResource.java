@@ -18,6 +18,6 @@ public interface IdentifyRequestedResource {
 	
 	String KEY_FOR_BRANDNAME = "BrandName";
 	
-	@Cacheable( unless = "#result == null || #result.error || #result.isEmpty()")
+	@Cacheable( keyGenerator = "urlResourceKeyGen" ,unless = "#result == null || !{#exceptionList.isEmpty()} || #result.isEmpty()")
 	List<JSONObject> findRequestedResource(String identifier, String url, List<Throwable> exceptionList); 
 }
