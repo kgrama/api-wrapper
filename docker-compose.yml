@@ -4,3 +4,15 @@ services:
     build: .
     ports:
       - "8080:8080"
+
+  solr:
+    image: bitnami/solr:8
+    environment:
+      - SOLR_ENABLE_AUTHENTICATION=no
+    ports:
+      - '8983:8983'
+    volumes:
+      - 'solr_data:/bitnami/solr'
+volumes:
+  solr_data:
+    driver: local
