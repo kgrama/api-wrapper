@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONPointer;
 import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +51,7 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 			try {
 				return findJsonObject(dataAsStream, identifier);
 			} catch (Exception e) {
+				log.error("Exception in find json object in response", e);
 				reporting.getParseExceptionCounter().increment();
 				return Collections.emptyList();
 			}
@@ -80,24 +80,33 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 		}
 		try {
 			if (JSONObject.class.cast(jsonArray.get(0)).has(KEY_FOR_BRAND)) {
-				return searchForResourceInData((JSONArray) JSONObject.class.cast(jsonArray.get(0)).get(KEY_FOR_BRAND), identifier);
+				return iterateBrandResourcesForIdentifier((JSONArray) JSONObject.class.cast(jsonArray.get(0)).get(KEY_FOR_BRAND), identifier);
 			}
 		} catch (JSONException e) {
 			log.trace("{}", e);
 		}
-		try {
-			var jsonResourceArray = jsonArray.query(JSONPointer.builder().append(0).append(KEY_FOR_SAMPLE).build());
-			if (jsonResourceArray != null) {
-				return identifyRequiredResource(JSONArray.class.cast(jsonResourceArray), identifier);
-			}
-		} catch (JSONException | ClassCastException e) {
-			log.trace("{}", e);
-		} 
 		return null;
 	}
-
-	private List<JSONObject> identifyRequiredResource(JSONArray requestedResources, String identifier) {
+	
+	private List<JSONObject> iterateBrandResourcesForIdentifier(JSONArray brandResources, String identifier) {
 		var matchingVals = new LinkedList<JSONObject>();
+		for (Object expectJsonObj : brandResources) {
+			try {
+				var objAsJson = JSONObject.class.cast(expectJsonObj);
+				for (String key: objAsJson.keySet()) {
+					if (!KEY_FOR_BRANDNAME.equals(key)) {
+						identifyRequiredResource(JSONArray.class.cast(objAsJson.get(key)), identifier, matchingVals);
+					}
+				}
+			} catch (Exception e) {
+				log.trace("ignoreable exception {}", e);
+			}
+		}
+		return matchingVals;
+	}
+
+	private void identifyRequiredResource(JSONArray requestedResources, String identifier, List<JSONObject> matchingVals) {
+		
 		requestedResources.forEach((obj)-> {
 			log.trace("{}", obj);
 			try {
@@ -109,7 +118,6 @@ public class MultiResponseDeserialiseAndIdentify implements IdentifyRequestedRes
 				log.error("Error parsing resource array {}", e);
 			}
 		});
-		return matchingVals;
 		
 	}
 

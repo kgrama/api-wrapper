@@ -34,7 +34,7 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 	private String urlString = "";
 	private String  testPath = "/some-path/";
 
-	private String[] validATMIdentifiers = {"LFFFBC11", "LFFADC11"};
+	private String[] validATMIdentifiers = {"LFFFBC11", "LFFADC11", "LFFFBC112"};
 	private String[] invalidATMIdentifiers = {"30935500", "30847300"};
 	
 	private double previous;
@@ -97,6 +97,22 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 	}
 	
 	@Test
+	public void verifyCorrectResourceIdentificationMultiBrand() throws InterruptedException, JsonProcessingException {
+		log.debug("Verify that status 2xx responses are handled");
+		mockBackend.enqueue(initHttpOKMultiBrandMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
+		var  exceptionList = new LinkedList<Throwable>();
+		var jsonResponse = identifyExternalResource.findRequestedResource(validATMIdentifiers[2], urlString,exceptionList);
+		assertTrue(exceptionList.isEmpty());
+		assertNotNull(jsonResponse);
+		assertFalse(jsonResponse.isEmpty());
+		expectedERRCount(0);
+		await().atMost(maxWaitTime+5, TimeUnit.SECONDS).untilAsserted(() -> {
+			var jsonResponseCached = identifyExternalResource.findRequestedResource(validATMIdentifiers[2], urlString,exceptionList);
+			assertNotNull(jsonResponseCached);
+		});
+	}
+	
+	@Test
 	public void verifyCorrectResourceIdentificationButNoResource() throws InterruptedException, JsonProcessingException {
 		log.debug("Verify that status 2xx responses are handled");
 		mockBackend.enqueue(initHttpOKMockResponse().setBodyDelay(2, TimeUnit.SECONDS));
@@ -108,6 +124,8 @@ public class IdentifyRequestedResourceTest extends MultipartDataTestParent {
 		log.debug("Test that errors are not cached");
 		verifyInvalidResultsNotCached(exceptionList);
 	}
+	
+	
 	
 	private void verifyInvalidResultsNotCached(LinkedList<Throwable> exceptionList) {
 		await().atMost(maxWaitTime+5, TimeUnit.SECONDS).untilAsserted(() -> {

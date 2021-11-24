@@ -30,5 +30,8 @@ public class MultipartDataTestParent {
 	protected MockResponse initHttpOKMockResponse() throws JsonProcessingException {
 		return new MockResponse().setChunkedBody(TestSampleDataConstants.COMPLEX_RESPONSE, TestSampleDataConstants.COMPLEX_RESPONSE.length()/3 ).setResponseCode(200);
 	}
-
+	
+	protected MockResponse initHttpOKMultiBrandMockResponse() throws JsonProcessingException {
+		return new MockResponse().setChunkedBody(TestSampleDataConstants.COMPLEX_RESPONSE_MULTI_BRAND, TestSampleDataConstants.COMPLEX_RESPONSE_MULTI_BRAND.length()/6 ).setResponseCode(200);
+	}
 }
