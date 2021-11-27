@@ -39,3 +39,6 @@ Once the service is running via docker it currently supports the filtering of op
 ```
 /api-wrapper/v1/aHR0cHM6Ly9hcGkubGxveWRzYmFuay5jb20vb3Blbi1iYW5raW5nL3YyLjIvYXRtcw==/LFFFBC11
 ```
+
+### TODO
+- Implement update lookup for cached data
