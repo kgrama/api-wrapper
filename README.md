@@ -1,6 +1,6 @@
-## API wrapper demo application
+## Openbanking ATM API wrapper
 
-This application is a java spring boot application that exposes one API to retrieve and filter data from an external URL.
+This application is a java spring boot application that exposes one API to retrieve and filter data from an external openbanking URL.
 
 To start checkout the project  and run
 
